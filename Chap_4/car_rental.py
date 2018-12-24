@@ -110,8 +110,9 @@ def expected_return(state, action, state_value, constant_returned_cars):
             num_of_cars_second_loc_ = min(
               num_of_cars_second_loc + returned_cars_second_loc, MAX_CARS)
             prob_ = poisson(returned_cars_first_loc, RETURNS_FIRST_LOC) * \
-                 poisson(returned_cars_second_loc, RETURNS_SECOND_LOC) * prob
-            returns += prob_ * (reward + DISCOUNT * state_value[num_of_cars_first_loc_, num_of_cars_second_loc_])
+                poisson(returned_cars_second_loc, RETURNS_SECOND_LOC) * prob
+            returns += prob_ * (
+              reward + DISCOUNT * state_value[num_of_cars_first_loc_, num_of_cars_second_loc_])
   return returns
 
 
