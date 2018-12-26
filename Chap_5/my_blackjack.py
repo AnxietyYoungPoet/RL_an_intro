@@ -38,13 +38,13 @@ def get_random_starts(episodes):
   return starts
 
 
-def play(policy, cards, start=None):
+def play(policy, cards, init_state=None, init_action=None):
   dealer_init_cards = cards.get_card(2)
   dealer_show = dealer_init_cards[-1]
   usable_ace = False
   ace = False
   trajectory = []
-  if start is None:
+  if init_state is None:
     player_init_cards = cards.get_card(2)
     player_sum = np.sum(player_init_cards)
     if 1 in player_init_cards:
@@ -56,11 +56,14 @@ def play(policy, cards, start=None):
       player_sum += hit_card
       ace = ace or hit_card == 1
       usable_ace = ace and (player_sum + 10 <= 21)
-    action = policy[player_sum + usable_ace * 10 - 12, dealer_show - 1, int(usable_ace)]
   else:
-    player_sum, dealer_show, usable_ace, action = start
+    player_sum, dealer_show, usable_ace = init_state
     player_sum -= usable_ace * 10
     dealer_init_cards[-1] = dealer_show
+  if init_action is None:
+    action = policy[player_sum + usable_ace * 10 - 12, dealer_show - 1, int(usable_ace)]
+  else:
+    action = init_action
 
   state = (usable_ace, player_sum, dealer_show)
 
@@ -129,7 +132,7 @@ def monte_carlo_on_policy(episodes):
 def monte_carlo_ES(episodes):
   cards = Cards()
   policy = np.zeros((10, 10, 2))
-  # policy[8:, :, :] = 1
+  policy[8:, :, :] = 1
   usable_ace_value = np.zeros((10, 10, 2))
   usable_ace_count = np.zeros_like(usable_ace_value)
   no_usable_ace_value = np.zeros((10, 10, 2))
@@ -137,7 +140,7 @@ def monte_carlo_ES(episodes):
 
   random_starts = get_random_starts(episodes)
   for random_start in tqdm(random_starts, ncols=64):
-    reward, trajectory = play(policy, cards, random_start)
+    reward, trajectory = play(policy, cards, random_start[:-1], random_start[-1])
     for state, action in trajectory:
       usable_ace, player_sum, dealer_show = state
       ps = player_sum + usable_ace * 10 - 12
@@ -155,6 +158,46 @@ def monte_carlo_ES(episodes):
   
   return usable_ace_value / (usable_ace_count + 1e-5), \
       no_usable_ace_value / (no_usable_ace_count + 1e-5)
+
+
+def monte_carlo_off_policy(episodes):
+  cards = Cards()
+  target_policy = np.zeros((10, 10, 2))
+  target_policy[8:, :, :] = 1
+  init_state = [13, 2, 1]
+  total_ordinary_value = np.zeros(episodes)
+  total_ordinary_count = np.zeros(episodes)
+  total_weighted_value = np.zeros(episodes)
+  total_weighted_count = np.zeros(episodes)
+  ordinary_value = 0
+  ordinary_count = 0
+  weighted_value = 0
+  weighted_count = 0
+  for i in range(episodes):
+    behavior_policy = np.random.randint(0, 2, (10, 10, 2))
+    reward, trajectory = play(behavior_policy, cards, init_state=init_state)
+    target_joint_prob = 1.
+    behavior_joint_prob = 1.
+    for state, action in trajectory:
+      usable_ace, player_sum, dealer_show = state
+      ps = player_sum + usable_ace * 10 - 12
+      ds = dealer_show - 1
+      if int(target_policy[ps, ds, int(usable_ace)]) != int(action):
+        target_joint_prob = 0
+        break
+      else:
+        behavior_joint_prob *= 0.5
+    rho = target_joint_prob / behavior_joint_prob
+    ordinary_value += rho * reward
+    ordinary_count += 1
+    weighted_value += rho * reward
+    weighted_count += rho
+    total_ordinary_value[i] = ordinary_value
+    total_ordinary_count[i] = ordinary_count
+    total_weighted_value[i] = weighted_value
+    total_weighted_count[i] = weighted_count
+  return total_ordinary_value / (total_ordinary_count + 1e-5), \
+      total_weighted_value / (total_weighted_count + 1e-5)
 
 
 def fig_5_1():
@@ -187,7 +230,7 @@ def fig_5_1():
 
 
 def fig_5_2():
-  states_usable_ace, states_no_usable_ace = monte_carlo_ES(10000000)
+  states_usable_ace, states_no_usable_ace = monte_carlo_ES(5000000)
 
   state_value_no_usable_ace = np.max(states_no_usable_ace[:, :, :], axis=-1)
   state_value_usable_ace = np.max(states_usable_ace[:, :, :], axis=-1)
@@ -221,6 +264,32 @@ def fig_5_2():
   plt.close()
 
 
+def fig_5_3():
+  true_value = -0.27726
+  episodes = 10000
+  runs = 100
+  error_ordinary = np.zeros(episodes)
+  error_weighted = np.zeros(episodes)
+  for i in tqdm(range(0, runs)):
+    ordinary_sampling_, weighted_sampling_ = monte_carlo_off_policy(episodes)
+    # get the squared error
+    error_ordinary += np.power(ordinary_sampling_ - true_value, 2)
+    error_weighted += np.power(weighted_sampling_ - true_value, 2)
+  error_ordinary /= runs
+  error_weighted /= runs
+
+  plt.plot(error_ordinary, label='Ordinary Importance Sampling')
+  plt.plot(error_weighted, label='Weighted Importance Sampling')
+  plt.xlabel('Episodes (log scale)')
+  plt.ylabel('Mean square error')
+  plt.xscale('log')
+  plt.legend()
+
+  plt.savefig('../images/figure_5_3.png')
+  plt.close()
+
+
 if __name__ == '__main__':
-  # fig_5_1()
+  fig_5_1()
   fig_5_2()
+  fig_5_3()

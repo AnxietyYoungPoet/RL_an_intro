@@ -1,6 +1,5 @@
 import numpy as np
 
-
-a = ((1, 2), 3) in [((1, 2), 3), ((4, 5), 6)]
-(a, b, c), d = ((1, 2, 3), 3)
-print(a, b, c, d)
+behavior_policy = np.ones((10, 10, 2)) / 2.
+behavior_policy[:, :, :] = np.random.binomial(1, 0.5)
+print(np.random.randint(0, 2, (10, 10, 2)))
