@@ -1,1 +1,1 @@
-# RL_an_intro
+# Reinforcement Learning: An Introduction by Sutton and et al.
