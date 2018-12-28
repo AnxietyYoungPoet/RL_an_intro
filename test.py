@@ -1,5 +1,5 @@
 import numpy as np
 
-behavior_policy = np.ones((10, 10, 2)) / 2.
-behavior_policy[:, :, :] = np.random.binomial(1, 0.5)
-print(2 * np.random.binomial(1, 0.5) - 1)
+a = np.zeros((3, 3, 3))
+b = (1, 2)
+print((3, 2) in [(3, i) for i in range(1, 11)])

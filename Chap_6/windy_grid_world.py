@@ -39,6 +39,7 @@ START = [3, 0]
 GOAL = [3, 7]
 ACTIONS = [ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT]
 
+
 def step(state, action):
     i, j = state
     if action == ACTION_UP:
@@ -51,6 +52,7 @@ def step(state, action):
         return [max(i - WIND[j], 0), min(j + 1, WORLD_WIDTH - 1)]
     else:
         assert False
+
 
 # play for an episode
 def episode(q_value):
@@ -84,6 +86,7 @@ def episode(q_value):
         action = next_action
         time += 1
     return time
+
 
 def figure_6_3():
     q_value = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
@@ -128,6 +131,6 @@ def figure_6_3():
         print(row)
     print('Wind strength for each column:\n{}'.format([str(w) for w in WIND]))
 
+
 if __name__ == '__main__':
     figure_6_3()
-
