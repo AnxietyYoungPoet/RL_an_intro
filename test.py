@@ -1,5 +1,5 @@
 import numpy as np
-import random
 
-a = np.array([[1, 2], [3, 4]])
-print(a[[0, 1]])
+a = np.zeros((3, 3, 3))
+b = (1, 2)
+print(np.power(0.8, np.arange(0, 5)))
