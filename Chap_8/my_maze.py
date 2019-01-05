@@ -79,7 +79,7 @@ class Maze_model(object):
   def record(self, state_action, state, reward):
     self.time += 1
     pre_state, action = state_action
-    if self.k > 1e-5:
+    if bool(self.k):
       flag = True
       for action_ in self.actions:
         if (pre_state, action_) in self.model.keys():
@@ -93,7 +93,7 @@ class Maze_model(object):
 
   def sample(self):
     (state_0, action_0), (state_, reward_, t) = random.choice(list(self.model.items()))
-    if self.k > 1e-5:
+    if bool(self.k):
       reward_ += self.k * np.sqrt(self.time - t)
     return (state_0, action_0), (state_, reward_)
 
@@ -259,8 +259,63 @@ def fig_8_4():
   plt.close()
 
 
+def fig_8_5():
+  global ALPHA
+  ALPHA = 1.0
+  k = 1e-3
+  obstacles = [[4, i] for i in range(2, 10)]
+  new_obstacles = [[4, i] for i in range(2, 9)]
+  start_state = (6, 4)
+  maze_model = Maze_model()
+  change_step = 3000
+  n = 10
+  runs = 5
+  max_step = 6000
+  cum_reward = np.zeros((runs, 2, max_step))
+  for r in tqdm(range(runs), ncols=64):
+    seed = np.random.randint(1, 10000)
+    for q in range(2):
+      change_flag = True
+      if q == 1:
+        maze_model.init_model(k)
+      else:
+        maze_model.init_model()
+      maze = Maze(obstacles=obstacles, start_state=start_state)
+      step = 0
+      last_step = step
+      reward = 0
+      value = np.zeros((maze.height + 2, maze.width + 2, 4))
+      ep_greedy = Epsilon_greedy(seed=seed)
+      while step < max_step:
+        if q == 0:
+          step += dyna_Q(n, maze, ep_greedy, value, maze_model)
+        else:
+          step += dyna_Q_plus(n, maze, ep_greedy, value, maze_model)
+        cum_reward[r, q, last_step: min(step, max_step)] = reward
+        reward += 1
+        last_step = step
+        if change_flag and step > change_step:
+          maze = Maze(obstacles=new_obstacles, start_state=start_state)
+          change_flag = False
+  cum_reward = cum_reward.mean(axis=0)
+  plt.plot(cum_reward[0], label='dyna-Q')
+  plt.plot(cum_reward[1], label='dyna-Q+')
+  plt.xlabel('time steps')
+  plt.ylabel('cumulative reward')
+  plt.legend()
+
+  plt.savefig('../images/figure_8_4.png')
+  plt.close()
+
+
+def example_8_4():
+  pass
+
+
 if __name__ == '__main__':
   # fig_8_2()
-  fig_8_4()
+  # fig_8_4()
+  # fig_8_5()
+  example_8_4()
   # maze = Maze()
   # print(maze._maze)

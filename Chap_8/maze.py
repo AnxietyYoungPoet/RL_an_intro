@@ -666,6 +666,6 @@ def example_8_4():
 
 if __name__ == '__main__':
   # figure_8_2()
-  figure_8_4()
+  # figure_8_4()
   # figure_8_5()
-  # example_8_4()
+  example_8_4()
