@@ -3,7 +3,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import heapq
 import random
 
 
