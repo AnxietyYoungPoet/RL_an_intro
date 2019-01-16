@@ -466,7 +466,7 @@ def figure_9_10(true_value):
 if __name__ == '__main__':
   true_value = compute_true_value()
 
-  figure_9_1(true_value)
+  # figure_9_1(true_value)
   # figure_9_2(true_value)
-  # figure_9_5(true_value)
+  figure_9_5(true_value)
   # figure_9_10(true_value)

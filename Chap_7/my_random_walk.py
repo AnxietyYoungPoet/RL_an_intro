@@ -74,7 +74,7 @@ def n_step_TD(n, alpha, value, actions):
     if tau >= 0:
       G = np.sum(reward_sequence * gamma_sequence)
       if tau + n < T:
-        G += value[state]
+        G += gamma_sequence[-1] * GAMMA * value[state]
       value[state_sequence[0]] += alpha * (G - value[state_sequence[0]])
     state_sequence[0: -1] = state_sequence[1:]
     state_sequence[-1] = state
