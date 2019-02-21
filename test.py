@@ -5,14 +5,14 @@ GLO = 10
 
 
 def f():
-	print(GLO)
+  print(GLO)
 
 
 def f2():
-	global GLO
-	GLO = 5
-	print(GLO)
-	f()
+  global GLO
+  GLO = 5
+  print(GLO)
+  f()
 
 
 f2()
