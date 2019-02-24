@@ -156,8 +156,11 @@ class TilingsValueFunction:
 # a wrapper class for polynomial / Fourier -based value function
 POLYNOMIAL_BASES = 0
 FOURIER_BASES = 1
+
+
 class BasesValueFunction:
-  # @order: # of bases, each function also has one more constant parameter (called bias in machine learning)
+  # @order: # of bases, each function also has one more
+  # constant parameter (called bias in machine learning)
   # @type: polynomial bases or Fourier bases
   def __init__(self, order, type):
     self.order = order
@@ -258,7 +261,7 @@ def semi_gradient_temporal_difference(value_function, n, alpha):
         returns += value_function.value(states[update_time + n])
       state_to_update = states[update_time]
       # update the value function
-      if not state_to_update in END_STATES:
+      if state_to_update not in END_STATES:
         delta = alpha * (returns - value_function.value(state_to_update))
         value_function.update(delta, state_to_update)
     if update_time == T - 1:
@@ -340,7 +343,8 @@ def figure_9_2_right(true_value):
           semi_gradient_temporal_difference(value_function, step, alpha)
           # calculate the RMS error
           state_value = np.asarray([value_function.value(i) for i in STATES])
-          errors[step_ind, alpha_ind] += np.sqrt(np.sum(np.power(state_value - true_value[1: -1], 2)) / N_STATES)
+          errors[step_ind, alpha_ind] += np.sqrt(
+            np.sum(np.power(state_value - true_value[1: -1], 2)) / N_STATES)
   # take average
   errors /= episodes * runs
   # truncate the error
